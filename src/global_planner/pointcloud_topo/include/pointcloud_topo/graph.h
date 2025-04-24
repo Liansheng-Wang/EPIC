@@ -112,7 +112,7 @@ public:
   bool is_history_odom_node_ = false;
   float yaw_;
   Eigen::Vector3f center_;
-  vector<BubbleNode::Ptr> bubbles_; // 过程量，计算出topoNode后会清空
+  vector<BubbleNode::Ptr> bubbles_;                 // 过程量，计算出topoNode后会清空
   unordered_set<TopoNode::Ptr> neighbors_;
   unordered_map<TopoNode::Ptr, uint8_t> unreachable_nbrs_;
   unordered_map<TopoNode::Ptr, vector<Eigen::Vector3f>> paths_;

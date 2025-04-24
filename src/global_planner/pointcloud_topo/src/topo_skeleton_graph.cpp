@@ -710,6 +710,11 @@ void TopoGraph::insertNodes(vector<TopoNode::Ptr> &nodes, bool only_raycast) {
   }
 }
 
+
+/**
+ * @brief 通过激光雷达点计算出来当前点在哪个大的区域，然后根据 raycast 计算出来中间经过的区域。
+ *        然后根据和当前位置的距离，判断距离最近的几个区域进行更新。
+ */
 void TopoGraph::getRegionsToUpdate() {
   update_idx_vec_.clear();
   viewpoints_update_region_arr_.clear();
@@ -734,16 +739,16 @@ void TopoGraph::getRegionsToUpdate() {
       Eigen::Vector3f lb1, hb1, lb2, hb2;
       index2boundary(region1->region_idx_, lb1, hb1);
       index2boundary(region2->region_idx_, lb2, hb2);
-      Eigen::Vector3f diff1 = ((hb1 + lb1) * 0.5 - lidar_map_interface_->ld_->lidar_pose_);
-      Eigen::Vector3f diff2 = ((hb2 + lb2) * 0.5 - lidar_map_interface_->ld_->lidar_pose_);
+      Eigen::Vector3f diff1 = ((hb1 + lb1) * 0.5 - lidar_map_interface_->ld_->lidar_pose_);  /// 这个操作是很多余的吧？
+      Eigen::Vector3f diff2 = ((hb2 + lb2) * 0.5 - lidar_map_interface_->ld_->lidar_pose_);  /// 就是计算中心点到当前位姿的距离.
       double dist1 = diff1.norm();
       double dist2 = diff2.norm();
       return dist1 < dist2;
     });
-    arr.resize(std::min((int)arr.size(), max_update_region_num_));
+    arr.resize(std::min((int)arr.size(), max_update_region_num_));             /// 只有距离最近的一些区域才会被更新。
 
     // 去重
-    unordered_set<RegionNode::Ptr> region2update(arr.begin(), arr.end());
+    unordered_set<RegionNode::Ptr> region2update(arr.begin(), arr.end());      /// 为什么不提前进行重复值检测呢？
     arr = vector<RegionNode::Ptr>(region2update.begin(), region2update.end());
   };
   // shorten_by_distance_insert_update_arr(toponodes_update_region_arr_);
@@ -785,12 +790,15 @@ void TopoGraph::updateSkeleton() {
   vector<TopoNode::Ptr> nodes2insert, nodes_remained, nodes2remove, new_nodes, old_nodes;
   mutex new_nodes_mtx;
   ros::Time t0 = ros::Time::now();
+
+  /// 除了插入的视点以外，其他部分全部整进来。
   for (auto &region : toponodes_update_region_arr_) {
     for (auto &node : region->topo_nodes_) {
       if (!node->is_viewpoint_)
         old_nodes.push_back(node);
     }
   }
+  
   omp_set_num_threads(6);
   // clang-format off
   #pragma omp parallel for

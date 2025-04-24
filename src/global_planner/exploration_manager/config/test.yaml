@@ -1,0 +1,91 @@
+#topic param:
+odometry_topic: /lio/robo/odom
+cloud_topic: /lio/cloud_world
+global_planning/w_vdir: 1.2          ## 速度方向发生改变的cost. w-> weight
+global_planning/w_yawdir: 0.0
+global_planning/w_firstnode: 0.2     #  这个参数没有用到
+#viz
+view_graph: true
+FrontierManager/view_cluster: true
+FrontierManager/view_frt: true
+# graph
+bubble_topo/min_x: 0.25     # 泡泡的最小尺寸, 要比 init_region_size_x 小
+bubble_topo/min_y: 0.25
+bubble_topo/min_z: 0.25
+bubble_topo/bubble_min_radius: 0.251        # 泡泡的最小半径, 这个值要比 init_region_size_x 小.但大于 bubble_topo/min_x
+bubble_topo/init_region_size_x: 2.0        # region 的最大尺寸, 将探索区域划分为多个 region
+bubble_topo/init_region_size_y: 2.0
+bubble_topo/init_region_size_z: 1.0
+bubble_topo/cube_discrete_size: 0.25       # 将 region 拆解成多个均匀 cube. 可以看做分辨率吧. 构建一个octtree 用于障碍物检测和判断.
+bubble_topo/odom_node_distance: 3.0        # 这个参数没有用到
+bubble_astar/safe_distance: 0.4            # 这个参数暂时不知道什么意思. TODO:
+# map param
+max_update_region_num: 99999999            # 这么大的数字，就是不限制更新区域的数量.
+frontier/candidate_dphi: 0.26              # 这个参数没有用.
+frontier/candidate_znum: 3                 # 这个参数没有用.
+lidar_perception/fov_up: 52.0              # fov_up 和 fov_down 没有用.
+lidar_perception/fov_down: -7.0
+lidar_perception/lidar_pitch: 0.0           # 这个参数和里程计的定义有关. EPIC 中 odom 中并没有考虑安装,但是lio_lite 已经考虑了. 所以给 0.0
+lidar_perception/fov_viewpoint_up: 28       # 这里是定义 fov 上下弧度的. 表示能不能看到. lio_lite 下应该是 上 29.5 下- 29.5 总计 59.0
+lidar_perception/fov_viewpoint_down: -28
+lidar_perception/max_ray_length: 18              # 这个似乎已没有用到.  TODO:
+parallel_astar/update_connection_timeout: 0.002  # 这两个时间不是很关紧. 代码中似乎是A*路径搜索的时间.
+parallel_astar/insert_node_timeout: 0.002
+FrontierManager/cell_size: 0.3                  
+FrontierManager/noise_cell_range: 0.8
+FrontierManager/good_observation_direction_score: 0.8
+FrontierManager/good_observation_force_trust_length: 4.0
+FrontierManager/good_observation_trust_length: 12.0
+FrontierManager/update_length: 15.0     # 比trust_length长一点就行，多了没用.  # 这个是 max_ray_length 的替身, 这个有用. 这个值以内的数据会被更新
+FrontierManager/cluster_max_size: 2.0   # 
+FrontierManager/cluster_min_size: 0.5   # 休眠的cluster. 小于这个阈值将不会被探索。小场景得设置的小一些
+
+# Density-Based Spatial Clustering of Applications with Noise 如果两个点之间的距离小于等于 1.0，则它们被认为是互为邻居
+FrontierManager/cluster_min_radius: 1.0         # DBSCAN 判断邻居的阈值, 这个值似乎太大了吧？ 这只是初步筛选用的值
+FrontierManager/cluster_direction_radius: 0.15  # cos(theta) > cluster_direction_radius # 紧邻是否合并的朝向依据.
+FrontierManager/cluster_minmum_point_num: 5
+
+# 柱形采样 去构建一个均匀的候选视点集合： origin_viewpoints_ 
+ViewpointManager/sample_pillar_min_height: 0.0     ## cluster 的中心位置再加上这个 sample_pillar_min_height. 
+ViewpointManager/sample_pillar_max_height: 1.0
+ViewpointManager/sample_pillar_height_layer_num: 2
+ViewpointManager/sample_pillar_min_radius: 0.6
+ViewpointManager/sample_pillar_max_radius: 3.0
+ViewpointManager/sample_pillar_radius_layer_num: 3
+ViewpointManager/sample_pillar_circle_sample_num: 8
+ViewpointManager/local_tsp_size: 20
+
+
+# 探索区域: area. 如果有多个 area 的话，主要是得保证探索区域得是连通的.
+box_num: 1
+box_0/down: [-10.0, -6.0, 0.2]     ## 如果 Z轴之间的范围不够会提示没有 frontier. TODO: 找找原因
+box_0/up: [182.0, 150.2, 2.0]
+# 禁止飞区域: dead_area
+dead_area_num: 0
+# trajectory param
+max_traj_len: 10.0
+DilateRadiusSoft: 0.6 # minco threshold
+DilateRadiusHard: 0.5 # collision check threshold
+MaxCorridorSize: 3.5
+MaxVelMag: 1.0
+maxBdrMag: 10000.0
+MaxTiltAngle: 0.5 # 最大飞行姿态角度 60°:1.0472 45°:0.7854 30°:0.5236 10°:0.1745
+MinThrust: 15.0
+MaxThrust: 22.0
+VehicleMass: 1.9
+GravAcc: 9.8
+HorizDrag: 0.70
+VertDrag: 0.80
+ParasDrag: 0.01
+SpeedEps: 0.0001
+WeightT: 2000.0
+WeightSafeT: 400.0
+# [pos_weight, vel_weight, omg_weight, theta_weight, thrust_weight]
+ChiVec: [2.0e+5, 1.5e+4, 1.0e+4, 1.0e+5, 1.0e+5]
+SmoothingEps: 0.015
+IntegralIntervs: 32
+RelCostTol: 1.0e-6
+#param for yaw opt
+yaw_max_vel: 4.0
+yaw_rho_vis: 10000.0
+yaw_time_fwd: 3.0

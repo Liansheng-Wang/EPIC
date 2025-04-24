@@ -110,6 +110,8 @@ struct LIOInterfaceData {
 };
 
 inline bool LIOInterface::IsInBox(const Eigen::Vector3f &pos) {
+
+  /// 只要不在box就 return false.
   auto inbox = [&](const Eigen::Vector3f &pt, const Eigen::Vector3f &min,
                    const Eigen::Vector3f &max) -> bool {
     for (int i = 0; i < 3; i++) {
@@ -118,6 +120,7 @@ inline bool LIOInterface::IsInBox(const Eigen::Vector3f &pos) {
     }
     return true;
   };
+
 
   for (int i = 0; i < lp_->dead_area_num_; i++) {
     Eigen::Vector3f min_ = lp_->dead_area_min_boundary_vec_[i];
@@ -132,6 +135,7 @@ inline bool LIOInterface::IsInBox(const Eigen::Vector3f &pos) {
     if (inbox(pos, min_, max_))
       return true;
   }
+  
   return false;
 }
 inline bool LIOInterface::IsInMap(const Eigen::Vector3f &pos) {

@@ -72,6 +72,8 @@ void FrontierManager::visfrtcluster() {
 
     visualization_msgs::Marker aabb_marker, viewpoint_number;
     visualization_msgs::Marker best_viewpoint, vp_frt_connecter;
+
+    /// sf_cluster->is_dormant_ 的判断条件之一是：根据 cluster 的大小来判断的
     if (!sf_cluster->is_reachable_ || sf_cluster->is_dormant_) {
       SetMarker(VizColor::BLACK, "aabb", 1.0, 0.5, aabb_marker, 1.0);
     } else if (!sf_cluster->is_new_cluster_) {

@@ -7,6 +7,15 @@
  * @Copyright (c) 2024 by ning-zelin, All Rights Reserved.
  */
 #include "pointcloud_topo/graph.h"
+
+
+// generateBubble()  // 在一个立方体中尝试生成一个 bubble
+// ├── 1. 判断中心可用性
+// ├── 2. 用中心估计半径（离障碍物距离）
+// ├── 3. 如果不合适（太小）：递归分割 cube → splitCubeBubbleGeneration()
+// └── 4. 如果合适但没完全覆盖 → supplementCubeBubbleGeneration() 对 cube 边缘补泡泡
+
+
 void TopoGraph::generateBubble(const Eigen::Vector3f &low_bd,
                                const Eigen::Vector3f &high_bd,
                                vector<BubbleNode::Ptr> &bubble_node_vec,

@@ -44,6 +44,7 @@ void LIOInterface::KNN(const PointType &pt, int k, PointVector &pts,
                        vector<float> &dis) {
   ikd_Tree_map.Nearest_Search(pt, k, pts, dis, 10.0);
 }
+
 void LIOInterface::boxSearch(const Eigen::Vector3f &min_bd,
                              const Eigen::Vector3f &max_bd, PointVector &pts) {
   BoxPointType boxpoint;
@@ -53,6 +54,7 @@ void LIOInterface::boxSearch(const Eigen::Vector3f &min_bd,
   }
   ikd_Tree_map.Box_Search(boxpoint, pts);
 }
+
 void LIOInterface::updateCloudMapOdometry(
     const sensor_msgs::PointCloud2ConstPtr &msg,
     const nav_msgs::Odometry::ConstPtr &odom_) {
@@ -70,6 +72,7 @@ void LIOInterface::updateCloudMapOdometry(
   Eigen::AngleAxisf y_axis_angle(M_PI / 180.0 * lp_->lidar_pitch_,
                                  Eigen::Vector3f::UnitY());
   Eigen::Quaternionf q_y(y_axis_angle);
+  ////TODO: 这个地方不对. 和我们定义的里程计是不对的. 我们的 lidar_q_ 不需要再考虑外参了.
   ld_->lidar_q_ = Eigen::Quaternionf(odom_->pose.pose.orientation.w,
                                      odom_->pose.pose.orientation.x,
                                      odom_->pose.pose.orientation.y,

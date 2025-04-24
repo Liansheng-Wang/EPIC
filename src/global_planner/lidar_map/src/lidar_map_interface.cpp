@@ -82,6 +82,8 @@ void LIOInterface::init(ros::NodeHandle &nh) {
   lp_->global_map_min_boundary_ = lp_->global_box_min_boundary_;
   cout << "max boundary: " << lp_->global_map_max_boundary_ << endl;
   cout << "min boundary: " << lp_->global_map_min_boundary_ << endl;
+
+  /// 这些参数在 lidar_map_interface 中没有使用.
   nh.param("lidar_perception/fov_up", lp_->fov_up, -0.1);
   nh.param("lidar_perception/fov_down", lp_->fov_down, -0.1);
   nh.param("lidar_perception/fov_viewpoint_up", lp_->fov_vp_up, -0.1);

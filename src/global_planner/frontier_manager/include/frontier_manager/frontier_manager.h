@@ -63,6 +63,7 @@ struct ViewpointParam {
   float fov_up_, fov_down_, lidar_pitch_;
   int consider_range_, global_recluster_size_, local_tsp_size_;
 };
+
 struct ByteArrayRaw {
   uint8_t *data;
   static size_t size;
@@ -139,6 +140,7 @@ struct ByteArrayRawHasher {
     return h;
   }
 };
+
 struct FrontierData {
   FrontierData() { ByteArrayRaw::size = 8; }
   FrontierData(size_t idx_bytes_size) {
@@ -273,6 +275,7 @@ public:
                   const std::vector<Eigen::Vector3f> &normals);
   void visfrtcluster();
   void vizBestViewpoint();
+  
   void updateFrontierClusters(vector<ClusterInfo::Ptr> &cluster_updated,
                               vector<int> &cluster_removed);
   void generateTSPViewpoints(Eigen::Vector3f &center_pose,

@@ -328,13 +328,13 @@ void FrontierManager::update_lidar_pt_gap(const vector<float> &depth) {
   }
   ros::Time t4 = ros::Time::now();
 
-  cv::Mat img_gap = cv::Mat::zeros(100, 200, CV_8UC1);
-  cv::Mat img_depth = cv::Mat::zeros(100, 200, CV_32FC1);
-  for (int i = 0; i < 100; i++)
-    for (int j = 0; j < 200; j++) {
-      img_gap.at<uchar>(i, j) = frtd_.is_gap_[i * 200 + j] ? 255 : 0;
-      img_depth.at<float>(i, j) = depth[i * 200 + j];
-    }
+  // cv::Mat img_gap = cv::Mat::zeros(100, 200, CV_8UC1);
+  // cv::Mat img_depth = cv::Mat::zeros(100, 200, CV_32FC1);
+  // for (int i = 0; i < 100; i++)
+  // for (int j = 0; j < 200; j++) {
+  //   img_gap.at<uchar>(i, j) = frtd_.is_gap_[i * 200 + j] ? 255 : 0;
+  //   img_depth.at<float>(i, j) = depth[i * 200 + j];
+  // }
 }
 
 void FrontierManager::cluster_frts(const PointVector &frt_new,
@@ -610,7 +610,8 @@ bool FrontierManager::is_fov_edge(const PointType &pt) {
 }
 
 void FrontierManager::updateFrontierClusters(
-    vector<ClusterInfo::Ptr> &cluster_updated, vector<int> &cluster_removed) {
+    vector<ClusterInfo::Ptr> &cluster_updated, vector<int> &cluster_removed) 
+{
   PointVector frt_new;
   auto has_dense_nbr = [&](const Eigen::Vector3i &idx) -> bool {
     for (int i = -1; i <= 1; i++) {
@@ -658,9 +659,11 @@ void FrontierManager::updateFrontierClusters(
     pts_vec[idx] = lidar_map_interface_->ld_->lidar_cloud_.points;
     idx++;
   }
+
+  //// 把历史的5帧点云做处理
   vector<float> depth = vector<float>(20000, -0.1);
   project_pts_2_depth_image(lidar_map_interface_->ld_->lidar_cloud_.points, depth);
-  update_lidar_fov_edge(depth); // handle 雷达保护罩/旋翼/近点之类的东西
+  update_lidar_fov_edge(depth); // handle 雷达保护罩/旋翼/近点之类的东西. 在极坐标下不断的更新掩码.
   for (int i = 0; i < pts_vec.size(); i++) {
     if (i == idx - 1)
       continue;
@@ -668,12 +671,13 @@ void FrontierManager::updateFrontierClusters(
   }
   update_lidar_pt_gap(depth);
   // 把gap-point可视化出来
+  /// 根据雷达点云把当前观测的活跃cell计算出来
   get_cells_2_update(lidar_map_interface_->ld_->lidar_cloud_.points,
                      cells_2_update);
   for (auto &cell : cells_2_update) {
     ByteArrayRaw bytes;
     idx2bytes(cell, bytes);
-    frtd_.frt_map_.erase(bytes);
+    frtd_.frt_map_.erase(bytes);  /// 先擦除当前活跃的cell. 然后再根据重新聚类？
   }
   Eigen::Vector3f lidar_position =
       lidar_map_interface_->ld_->lidar_pose_.cast<float>();
@@ -684,7 +688,7 @@ void FrontierManager::updateFrontierClusters(
     idx2pos(cell, pt);
     if (is_gap_point(pt) || is_fov_edge(pt) ||
         (pt.getVector3fMap() - lidar_position).norm() >
-            frtp_.good_observation_trust_length_) {
+            frtp_.good_observation_trust_length_) {   /// 距离判断。应该有一个法向量判断
       bad_observation.push_back(pt);
     } else
       good_observation.push_back(pt);
